@@ -1,0 +1,19 @@
+{
+    "name": "com.mortise.silk",
+    "version": "0.0.2",
+    "unity": "2019.4",
+    "author": {
+        "name": "onovich",
+        "email": "onovich1110@gmail.com"
+    },
+    "displayName": "MortiseFrame.Silk",
+    "description": "A Vector Animation Graphics Library",
+    "documentationURL": "https://github.com/onovich/Silk",
+    "hideInEditor": false,
+    "category": "Vector Graphics",
+    "keywords": [
+        "MortiseFrame",
+        "vector graphics"
+    ],
+    "unityRelease": "16f1"
+}

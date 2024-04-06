@@ -1,0 +1,16 @@
+{
+    "name": "MortiseFrame.Silk.Sample",
+    "rootNamespace": "",
+    "references": [
+        "GUID:972b343cc76344c8098ab47a394dceb9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
