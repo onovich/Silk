@@ -25,11 +25,11 @@ namespace MortiseFrame.Silk {
 
         public void TriangleStrip_Execute(Action<Material> begin, Action end) {
             foreach (var kv in event_queue_triangle_strip) {
-                begin.Invoke(kv.Key);
                 while (kv.Value.Count > 0) {
+                    begin.Invoke(kv.Key);
                     kv.Value.Dequeue().Invoke();
+                    end.Invoke();
                 }
-                end.Invoke();
             }
         }
 
@@ -42,11 +42,11 @@ namespace MortiseFrame.Silk {
 
         public void Triangle_Execute(Action<Material> begin, Action end) {
             foreach (var kv in event_queue_triangle) {
-                begin.Invoke(kv.Key);
                 while (kv.Value.Count > 0) {
+                    begin.Invoke(kv.Key);
                     kv.Value.Dequeue().Invoke();
+                    end.Invoke();
                 }
-                end.Invoke();
             }
         }
 
@@ -59,11 +59,11 @@ namespace MortiseFrame.Silk {
 
         public void Lines_Execute(Action<Material> begin, Action end) {
             foreach (var kv in event_queue_lines) {
-                begin.Invoke(kv.Key);
                 while (kv.Value.Count > 0) {
+                    begin.Invoke(kv.Key);
                     kv.Value.Dequeue().Invoke();
+                    end.Invoke();
                 }
-                end.Invoke();
             }
         }
 
