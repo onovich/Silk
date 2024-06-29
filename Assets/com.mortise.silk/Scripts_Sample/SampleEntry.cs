@@ -15,6 +15,7 @@ namespace MortiseFrame.Silk.Sample {
         [SerializeField] float starInnerRadius;
         [SerializeField] float starOuterRadius;
         [SerializeField] int starPoints = 3;
+        [SerializeField] bool fill;
 
         GLCore core;
 
@@ -24,10 +25,10 @@ namespace MortiseFrame.Silk.Sample {
         }
 
         void OnRenderObject() {
-            core.DrawCircle(mainCamera, material, Vector3.zero, 1, Color.red);
             core.DrawLine(mainCamera, material, start, end, Color.green, thickness);
-            core.DrawRect(mainCamera, material, Vector2.zero, new Vector2(2, 2), Color.red, thickness);
-            core.DrawStar(mainCamera, material, Vector2.zero, starPoints, starInnerRadius, starOuterRadius, Color.white, thickness);
+            core.DrawRect(mainCamera, material, material, Vector2.zero, new Vector2(2, 2), Color.red, thickness, fill: fill);
+            core.DrawCircle(mainCamera, material, material, new Vector3(2, 2, 0), 1, Color.blue, fill: fill);
+            core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white, thickness, fill: fill);
         }
 
     }

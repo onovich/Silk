@@ -42,19 +42,54 @@ namespace MortiseFrame.Silk {
             GL.End();
         }
 
-        public void DrawRect(Camera camera, Material material, Vector2 center, Vector2 size, Color color, float pixelThickness = 1.0f) {
+        public void DrawRect(Camera camera, Material borderMaterial, Material fillMaterial, Vector2 center, Vector2 size, Color color, float pixelThickness = 1.0f, bool fill = false) {
             var min = center - size / 2;
             var max = center + size / 2;
-            DrawLine(camera, material, new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0), color, pixelThickness);
-            DrawLine(camera, material, new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0), color, pixelThickness);
-            DrawLine(camera, material, new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0), color, pixelThickness);
-            DrawLine(camera, material, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
+
+            if (fill) {
+                fillMaterial.SetPass(0);
+                GL.Begin(GL.QUADS);
+                GL.Color(color);
+
+                GL.Vertex3(min.x, min.y, 0);
+                GL.Vertex3(max.x, min.y, 0);
+                GL.Vertex3(max.x, max.y, 0);
+                GL.Vertex3(min.x, max.y, 0);
+
+                GL.End();
+            }
+
+            DrawLine(camera, borderMaterial, new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0), color, pixelThickness);
+            DrawLine(camera, borderMaterial, new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0), color, pixelThickness);
+            DrawLine(camera, borderMaterial, new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0), color, pixelThickness);
+            DrawLine(camera, borderMaterial, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
         }
 
-        public void DrawCircle(Camera camera, Material material, Vector3 center, float radius, Color color, int segments = 64, float pixelThickness = 1.0f) {
+
+        public void DrawCircle(Camera camera, Material borderMaterial, Material fillMaterial, Vector3 center, float radius, Color color, int segments = 64, float pixelThickness = 1.0f, bool fill = false) {
+            if (fill) {
+                fillMaterial.SetPass(0);
+                GL.Begin(GL.TRIANGLES);
+                GL.Color(color);
+
+                for (int i = 0; i < segments; i++) {
+                    float angle1 = 2 * Mathf.PI * i / segments;
+                    float angle2 = 2 * Mathf.PI * (i + 1) / segments;
+
+                    Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius, center.y + Mathf.Sin(angle1) * radius, center.z);
+                    Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius, center.y + Mathf.Sin(angle2) * radius, center.z);
+
+                    GL.Vertex(center);
+                    GL.Vertex(vertex1);
+                    GL.Vertex(vertex2);
+                }
+
+                GL.End();
+            }
+
             float thickness = PixelToWorld(pixelThickness, camera);
 
-            material.SetPass(0);
+            borderMaterial.SetPass(0);
             GL.Begin(GL.TRIANGLE_STRIP);
             GL.Color(color);
 
@@ -73,14 +108,37 @@ namespace MortiseFrame.Silk {
             GL.End();
         }
 
-        public void DrawStar(Camera camera, Material material, Vector3 center, int points, float innerRadius, float outerRadius, Color color, float pixelThickness = 1.0f) {
+        public void DrawStar(Camera camera, Material material, Vector3 center, int points, float innerRadius, float outerRadius, Color color, float pixelThickness = 1.0f, bool fill = false) {
+            if (fill) {
+                material.SetPass(0);
+                GL.Begin(GL.TRIANGLES);
+                GL.Color(color);
+
+                for (int i = 0; i < points * 2; i++) {
+                    float angle1 = Mathf.PI * i / points;
+                    float angle2 = Mathf.PI * (i + 1) / points;
+
+                    float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
+                    float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
+
+                    Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
+                    Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
+
+                    GL.Vertex(center);
+                    GL.Vertex(vertex1);
+                    GL.Vertex(vertex2);
+                }
+
+                GL.End();
+            }
+
             material.SetPass(0);
             GL.Begin(GL.LINES);
             GL.Color(color);
 
             for (int i = 0; i < points * 2; i++) {
-                float angle1 = 2 * Mathf.PI * i / (points * 2);
-                float angle2 = 2 * Mathf.PI * (i + 1) / (points * 2);
+                float angle1 = Mathf.PI * i / points;
+                float angle2 = Mathf.PI * (i + 1) / points;
 
                 float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
                 float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
