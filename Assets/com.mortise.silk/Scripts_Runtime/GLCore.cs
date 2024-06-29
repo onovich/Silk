@@ -72,5 +72,27 @@ namespace MortiseFrame.Silk {
 
             GL.End();
         }
+
+        public void DrawStar(Camera camera, Material material, Vector3 center, int points, float innerRadius, float outerRadius, Color color, float pixelThickness = 1.0f) {
+            material.SetPass(0);
+            GL.Begin(GL.LINES);
+            GL.Color(color);
+
+            for (int i = 0; i < points * 2; i++) {
+                float angle1 = 2 * Mathf.PI * i / (points * 2);
+                float angle2 = 2 * Mathf.PI * (i + 1) / (points * 2);
+
+                float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
+                float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
+
+                Vector3 point1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
+                Vector3 point2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
+
+                GL.Vertex(point1);
+                GL.Vertex(point2);
+            }
+
+            GL.End();
+        }
     }
 }
