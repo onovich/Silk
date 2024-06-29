@@ -255,6 +255,7 @@ MonoBehaviour:
   starOuterRadius: 1
   starPoints: 10
   fill: 1
+  speed: 1
 --- !u!4 &1536820214
 Transform:
   m_ObjectHideFlags: 0

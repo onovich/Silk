@@ -44,7 +44,13 @@ namespace MortiseFrame.Silk {
             }
         }
 
-        public void DrawLine(Camera camera, Material material, Vector3 start, Vector3 end, Color color, float pixelThickness = 1.0f) {
+        #region Line
+        public void DrawLine(Camera camera,
+                             Material material,
+                             Vector3 start,
+                             Vector3 end,
+                             Color color,
+                             float pixelThickness = 1.0f) {
 
             Action task = () => {
                 float thickness = PixelToWorld(pixelThickness, camera);
@@ -57,53 +63,86 @@ namespace MortiseFrame.Silk {
                 GL.Vertex(end + perpendicular);
             };
             ctx.TriangleStrip_Enqueue(material, task);
-
         }
+        #endregion
 
-        public void DrawRect(Camera camera, Material borderMaterial, Material fillMaterial, Vector2 center, Vector2 size, Color color, float pixelThickness = 1.0f, bool fill = false) {
-
+        #region Rect
+        public void DrawRect(Camera camera,
+                             Material material,
+                             Vector2 center,
+                             Vector2 size,
+                             Color color) {
             var min = center - size / 2;
             var max = center + size / 2;
 
             Action task = () => {
-                if (fill) {
-                    GL.Color(color);
+                GL.Color(color);
 
-                    GL.Vertex3(min.x, min.y, 0);
-                    GL.Vertex3(max.x, min.y, 0);
-                    GL.Vertex3(max.x, max.y, 0);
-                    GL.Vertex3(min.x, max.y, 0);
-                    GL.Vertex3(min.x, min.y, 0);
-                }
+                GL.Vertex3(min.x, min.y, 0);
+                GL.Vertex3(max.x, min.y, 0);
+                GL.Vertex3(max.x, max.y, 0);
+                GL.Vertex3(min.x, max.y, 0);
+                GL.Vertex3(min.x, min.y, 0);
             };
-            ctx.TriangleStrip_Enqueue(fillMaterial, task);
-
-            DrawLine(camera, borderMaterial, new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0), color, pixelThickness);
-            DrawLine(camera, borderMaterial, new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0), color, pixelThickness);
-            DrawLine(camera, borderMaterial, new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0), color, pixelThickness);
-            DrawLine(camera, borderMaterial, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
+            ctx.TriangleStrip_Enqueue(material, task);
         }
+        #endregion
 
-        public void DrawCircle(Camera camera, Material borderMaterial, Material fillMaterial, Vector3 center, float radius, Color color, int segments = 64, float pixelThickness = 1.0f, bool fill = false) {
+        #region WiredRect
+        public void DrawWiredRect(Camera camera,
+                             Material material,
+                             Vector2 center,
+                             Vector2 size,
+                             Color color,
+                             float pixelThickness) {
+            var min = center - size / 2;
+            var max = center + size / 2;
+
+            if (pixelThickness <= 0) {
+                return;
+            }
+
+            DrawLine(camera, material, new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0), color, pixelThickness);
+            DrawLine(camera, material, new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0), color, pixelThickness);
+            DrawLine(camera, material, new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0), color, pixelThickness);
+            DrawLine(camera, material, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
+        }
+        #endregion
+
+        #region Circle
+        public void DrawCircle(Camera camera,
+                               Material material,
+                               Vector3 center,
+                               float radius,
+                               Color color,
+                               int segments = 64) {
             Action fillTask = () => {
-                if (fill) {
-                    GL.Color(color);
+                GL.Color(color);
 
-                    for (int i = 0; i < segments; i++) {
-                        float angle1 = 2 * Mathf.PI * i / segments;
-                        float angle2 = 2 * Mathf.PI * (i + 1) / segments;
+                for (int i = 0; i < segments; i++) {
+                    float angle1 = 2 * Mathf.PI * i / segments;
+                    float angle2 = 2 * Mathf.PI * (i + 1) / segments;
 
-                        Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius, center.y + Mathf.Sin(angle1) * radius, center.z);
-                        Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius, center.y + Mathf.Sin(angle2) * radius, center.z);
+                    Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius, center.y + Mathf.Sin(angle1) * radius, center.z);
+                    Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius, center.y + Mathf.Sin(angle2) * radius, center.z);
 
-                        GL.Vertex(center);
-                        GL.Vertex(vertex1);
-                        GL.Vertex(vertex2);
-                    }
+                    GL.Vertex(center);
+                    GL.Vertex(vertex1);
+                    GL.Vertex(vertex2);
                 }
             };
-            ctx.Triangle_Enqueue(fillMaterial, fillTask);
+            ctx.Triangle_Enqueue(material, fillTask);
+        }
+        #endregion
 
+        #region WiredCircle
+        public void DrawWiredCircle(Camera camera,
+                              Material material,
+                              Vector3 center,
+                              float radius,
+                              Color color,
+                              float pixelThickness = 1f,
+                              int segments = 64) {
 
             Action boundTask = () => {
 
@@ -123,79 +162,128 @@ namespace MortiseFrame.Silk {
                 }
 
             };
-            ctx.TriangleStrip_Enqueue(borderMaterial, boundTask);
+            ctx.TriangleStrip_Enqueue(material, boundTask);
         }
+        #endregion
 
-        public void DrawRing(Camera camera, Material borderMaterial, Material fillMaterial, Vector3 center, float outerRadius, float pixelThickness, Color color, bool fill = false, int segments = 64) {
+        #region Ring
+        public void DrawRing(Camera camera,
+                             Material material,
+                             Vector3 center,
+                             float outerRadius,
+                             float pixelThickness,
+                             Color color,
+                             int segments = 64) {
             float innerRadius = outerRadius - PixelToWorld(pixelThickness, camera);
 
             Action fillTask = () => {
 
-                if (fill) {
-                    GL.Color(color);
+                GL.Color(color);
 
-                    for (int i = 0; i < segments; i++) {
-                        float angle1 = 2 * Mathf.PI * i / segments;
-                        float angle2 = 2 * Mathf.PI * (i + 1) / segments;
+                for (int i = 0; i < segments; i++) {
+                    float angle1 = 2 * Mathf.PI * i / segments;
+                    float angle2 = 2 * Mathf.PI * (i + 1) / segments;
 
-                        Vector3 vertex1_outer = new Vector3(center.x + Mathf.Cos(angle1) * outerRadius, center.y + Mathf.Sin(angle1) * outerRadius, center.z);
-                        Vector3 vertex2_outer = new Vector3(center.x + Mathf.Cos(angle2) * outerRadius, center.y + Mathf.Sin(angle2) * outerRadius, center.z);
+                    Vector3 vertex1_outer = new Vector3(center.x + Mathf.Cos(angle1) * outerRadius, center.y + Mathf.Sin(angle1) * outerRadius, center.z);
+                    Vector3 vertex2_outer = new Vector3(center.x + Mathf.Cos(angle2) * outerRadius, center.y + Mathf.Sin(angle2) * outerRadius, center.z);
 
-                        Vector3 vertex1_inner = new Vector3(center.x + Mathf.Cos(angle1) * innerRadius, center.y + Mathf.Sin(angle1) * innerRadius, center.z);
-                        Vector3 vertex2_inner = new Vector3(center.x + Mathf.Cos(angle2) * innerRadius, center.y + Mathf.Sin(angle2) * innerRadius, center.z);
+                    Vector3 vertex1_inner = new Vector3(center.x + Mathf.Cos(angle1) * innerRadius, center.y + Mathf.Sin(angle1) * innerRadius, center.z);
+                    Vector3 vertex2_inner = new Vector3(center.x + Mathf.Cos(angle2) * innerRadius, center.y + Mathf.Sin(angle2) * innerRadius, center.z);
 
-                        // Triangle 1
-                        GL.Vertex(vertex1_inner);
-                        GL.Vertex(vertex1_outer);
-                        GL.Vertex(vertex2_outer);
+                    // Triangle 1
+                    GL.Vertex(vertex1_inner);
+                    GL.Vertex(vertex1_outer);
+                    GL.Vertex(vertex2_outer);
 
-                        // Triangle 2
-                        GL.Vertex(vertex1_inner);
-                        GL.Vertex(vertex2_outer);
-                        GL.Vertex(vertex2_inner);
-                    }
-
+                    // Triangle 2
+                    GL.Vertex(vertex1_inner);
+                    GL.Vertex(vertex2_outer);
+                    GL.Vertex(vertex2_inner);
                 }
+
             };
-            ctx.Triangle_Enqueue(fillMaterial, fillTask);
-
-            DrawCircle(camera, borderMaterial, fillMaterial, center, outerRadius, color, segments, 1, false);
-            DrawCircle(camera, borderMaterial, fillMaterial, center, innerRadius, color, segments, 1, false);
+            ctx.TriangleStrip_Enqueue(material, fillTask);
         }
+        #endregion
 
-        public void DrawTriangle(Camera camera, Material material, Vector3 a, Vector3 b, Vector3 c, Color color, float pixelThickness = 1.0f) {
+        #region WiredRing
+        public void DrawWiredRing(Camera camera,
+                             Material material,
+                             Vector3 center,
+                             float outerRadius,
+                             float pixelThickness,
+                             Color color,
+                             int segments = 64) {
+            float innerRadius = outerRadius - PixelToWorld(pixelThickness, camera);
+
+            DrawWiredCircle(camera, material, center, outerRadius, color, pixelThickness, segments);
+            DrawWiredCircle(camera, material, center, innerRadius, color, pixelThickness, segments);
+        }
+        #endregion
+
+        #region Triangle
+        public void DrawTriangle(Camera camera,
+                                 Material material,
+                                 Vector3 a,
+                                 Vector3 b,
+                                 Vector3 c,
+                                 Color color) {
             Action task = () => {
                 GL.Color(color);
                 GL.Vertex(a);
                 GL.Vertex(b);
                 GL.Vertex(c);
             };
-            ctx.Triangle_Enqueue(material, task);
+            ctx.TriangleStrip_Enqueue(material, task);
         }
+        #endregion
 
-        public void DrawStar(Camera camera, Material material, Vector3 center, int points, float innerRadius, float outerRadius, Color color, float pixelThickness = 1.0f, bool fill = false) {
+        #region WiredTriangle
+        public void DrawWiredTriangle(Camera camera,
+                                 Material material,
+                                 Vector3 a,
+                                 Vector3 b,
+                                 Vector3 c,
+                                 Color color,
+                                 float pixelThickness) {
+            DrawLine(camera, material, a, b, color, pixelThickness);
+            DrawLine(camera, material, b, c, color, pixelThickness);
+            DrawLine(camera, material, c, a, color, pixelThickness);
+        }
+        #endregion
 
-            if (fill) {
-                Action fillTask = () => {
-                    GL.Color(color);
+        #region Star
+        public void DrawStar(Camera camera,
+                             Material material,
+                             Vector3 center,
+                             int points,
+                             float innerRadius,
+                             float outerRadius,
+                             Color color) {
 
-                    for (int i = 0; i < points * 2; i++) {
-                        float angle1 = Mathf.PI * i / points;
-                        float angle2 = Mathf.PI * (i + 1) / points;
+            for (int i = 0; i < points * 2; i++) {
+                float angle1 = Mathf.PI * i / points;
+                float angle2 = Mathf.PI * (i + 1) / points;
 
-                        float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
-                        float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
+                float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
+                float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
 
-                        Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
-                        Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
-
-                        GL.Vertex(center);
-                        GL.Vertex(vertex1);
-                        GL.Vertex(vertex2);
-                    }
-                };
-                ctx.TriangleStrip_Enqueue(material, fillTask);
+                Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
+                Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
+                DrawTriangle(camera, material, center, vertex1, vertex2, color);
             }
+        }
+        #endregion
+
+        #region WiredStar
+        public void DrawWiredStar(Camera camera,
+                             Material material,
+                             Vector3 center,
+                             int points,
+                             float innerRadius,
+                             float outerRadius,
+                             Color color,
+                             float pixelThickness) {
 
             GL.Color(color);
             for (int i = 0; i < points * 2; i++) {
@@ -211,6 +299,7 @@ namespace MortiseFrame.Silk {
                 DrawLine(camera, material, point1, point2, color, pixelThickness);
             }
         }
+        #endregion
 
         public void TearDown() {
             ctx.Clear();

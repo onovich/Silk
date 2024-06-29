@@ -18,18 +18,38 @@ namespace MortiseFrame.Silk.Sample {
         [SerializeField] bool fill;
 
         GLCore core;
+        Vector2 axis;
+        Vector2 agent;
+        [SerializeField] float speed = 1.0f;
 
         void Start() {
             Camera.main.allowMSAA = useMSAA;
             core = new GLCore();
         }
 
+        void Update() {
+            axis = Vector2.zero;
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) axis.y += 1;
+            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) axis.y -= 1;
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) axis.x -= 1;
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) axis.x += 1;
+            agent += axis.normalized * Time.deltaTime * speed;
+        }
+
         void LateUpdate() {
-            core.DrawRing(mainCamera, material, material, new Vector3(-2, 2, 0), 1, 4, Color.red, fill: fill);
-            core.DrawLine(mainCamera, material, start, end, Color.red, thickness);
-            core.DrawRect(mainCamera, material, material, Vector2.zero, new Vector2(2, 2), Color.red, thickness, fill: fill);
-            core.DrawCircle(mainCamera, material, material, new Vector3(2, 2, 0), 1, Color.red, fill: fill);
-            core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.red, thickness, fill: fill);
+            core.DrawLine(mainCamera, material, start, end, Color.cyan, thickness);
+            if (fill) {
+                core.DrawCircle(mainCamera, material, agent, 1, Color.yellow);
+                core.DrawRing(mainCamera, material, new Vector3(-2, 2, 0), 1, 4, Color.red);
+                core.DrawRect(mainCamera, material, new Vector3(2, 2, 0), Vector2.one, Color.green);
+                core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white);
+            } else {
+                core.DrawWiredCircle(mainCamera, material, agent, 1, Color.yellow, thickness);
+                core.DrawWiredRing(mainCamera, material, new Vector3(-2, 2, 0), 1, thickness, Color.red);
+                core.DrawWiredRect(mainCamera, material, new Vector3(2, 2, 0), Vector2.one, Color.green, thickness);
+                core.DrawWiredStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white, thickness);
+            }
+
         }
 
         void OnRenderObject() {
