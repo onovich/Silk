@@ -48,13 +48,14 @@ namespace MortiseFrame.Silk {
 
             if (fill) {
                 fillMaterial.SetPass(0);
-                GL.Begin(GL.QUADS);
+                GL.Begin(GL.TRIANGLE_STRIP);
                 GL.Color(color);
 
                 GL.Vertex3(min.x, min.y, 0);
                 GL.Vertex3(max.x, min.y, 0);
                 GL.Vertex3(max.x, max.y, 0);
                 GL.Vertex3(min.x, max.y, 0);
+                GL.Vertex3(min.x, min.y, 0);
 
                 GL.End();
             }
