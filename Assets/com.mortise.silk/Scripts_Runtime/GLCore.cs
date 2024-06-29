@@ -20,13 +20,6 @@ namespace MortiseFrame.Silk {
                 GL.End();
             });
 
-            ctx.Triangle_Execute((materai) => {
-                materai.SetPass(0);
-                GL.Begin(GL.TRIANGLES);
-            }, () => {
-                GL.End();
-            });
-
             ctx.LineStrip_Execute((materai) => {
                 materai.SetPass(0);
                 GL.Begin(GL.LINE_STRIP);
@@ -152,7 +145,7 @@ namespace MortiseFrame.Silk {
                     GL.Vertex(vertex2);
                 }
             };
-            ctx.Triangle_Enqueue(material, fillTask);
+            ctx.TriangleStrip_Enqueue(material, fillTask);
         }
         #endregion
 
