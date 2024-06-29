@@ -27,6 +27,13 @@ namespace MortiseFrame.Silk {
                 GL.End();
             });
 
+            ctx.LineStrip_Execute((materai) => {
+                materai.SetPass(0);
+                GL.Begin(GL.LINE_STRIP);
+            }, () => {
+                GL.End();
+            });
+
         }
 
         public Material CreateMaterial(Shader shader) {
@@ -51,18 +58,32 @@ namespace MortiseFrame.Silk {
                              Vector3 end,
                              Color color,
                              float pixelThickness = 1.0f) {
+            if (pixelThickness <= 0) {
+                return;
+            }
 
-            Action task = () => {
-                float thickness = PixelToWorld(pixelThickness, camera);
-                GL.Color(color);
-                Vector3 perpendicular = Vector3.Cross(end - start, camera.transform.forward).normalized * thickness / 2;
+            if (pixelThickness == 1) {
+                Action task = () => {
+                    GL.Color(color);
+                    GL.Vertex(start);
+                    GL.Vertex(end);
+                };
+                ctx.LineStrip_Enqueue(material, task);
+            }
 
-                GL.Vertex(start - perpendicular);
-                GL.Vertex(start + perpendicular);
-                GL.Vertex(end - perpendicular);
-                GL.Vertex(end + perpendicular);
-            };
-            ctx.TriangleStrip_Enqueue(material, task);
+            if (pixelThickness > 1) {
+                Action task = () => {
+                    float thickness = PixelToWorld(pixelThickness, camera);
+                    GL.Color(color);
+                    Vector3 perpendicular = Vector3.Cross(end - start, camera.transform.forward).normalized * thickness / 2;
+
+                    GL.Vertex(start - perpendicular);
+                    GL.Vertex(start + perpendicular);
+                    GL.Vertex(end - perpendicular);
+                    GL.Vertex(end + perpendicular);
+                };
+                ctx.TriangleStrip_Enqueue(material, task);
+            }
         }
         #endregion
 
@@ -176,33 +197,22 @@ namespace MortiseFrame.Silk {
                              int segments = 64) {
             float innerRadius = outerRadius - PixelToWorld(pixelThickness, camera);
 
-            Action fillTask = () => {
+            GL.Color(color);
 
-                GL.Color(color);
+            for (int i = 0; i < segments; i++) {
+                float angle1 = 2 * Mathf.PI * i / segments;
+                float angle2 = 2 * Mathf.PI * (i + 1) / segments;
 
-                for (int i = 0; i < segments; i++) {
-                    float angle1 = 2 * Mathf.PI * i / segments;
-                    float angle2 = 2 * Mathf.PI * (i + 1) / segments;
+                Vector3 vertex1_outer = new Vector3(center.x + Mathf.Cos(angle1) * outerRadius, center.y + Mathf.Sin(angle1) * outerRadius, center.z);
+                Vector3 vertex2_outer = new Vector3(center.x + Mathf.Cos(angle2) * outerRadius, center.y + Mathf.Sin(angle2) * outerRadius, center.z);
 
-                    Vector3 vertex1_outer = new Vector3(center.x + Mathf.Cos(angle1) * outerRadius, center.y + Mathf.Sin(angle1) * outerRadius, center.z);
-                    Vector3 vertex2_outer = new Vector3(center.x + Mathf.Cos(angle2) * outerRadius, center.y + Mathf.Sin(angle2) * outerRadius, center.z);
+                Vector3 vertex1_inner = new Vector3(center.x + Mathf.Cos(angle1) * innerRadius, center.y + Mathf.Sin(angle1) * innerRadius, center.z);
+                Vector3 vertex2_inner = new Vector3(center.x + Mathf.Cos(angle2) * innerRadius, center.y + Mathf.Sin(angle2) * innerRadius, center.z);
 
-                    Vector3 vertex1_inner = new Vector3(center.x + Mathf.Cos(angle1) * innerRadius, center.y + Mathf.Sin(angle1) * innerRadius, center.z);
-                    Vector3 vertex2_inner = new Vector3(center.x + Mathf.Cos(angle2) * innerRadius, center.y + Mathf.Sin(angle2) * innerRadius, center.z);
+                DrawTriangle(camera, material, vertex1_inner, vertex1_outer, vertex2_outer, color);
+                DrawTriangle(camera, material, vertex1_inner, vertex2_outer, vertex2_inner, color);
+            }
 
-                    // Triangle 1
-                    GL.Vertex(vertex1_inner);
-                    GL.Vertex(vertex1_outer);
-                    GL.Vertex(vertex2_outer);
-
-                    // Triangle 2
-                    GL.Vertex(vertex1_inner);
-                    GL.Vertex(vertex2_outer);
-                    GL.Vertex(vertex2_inner);
-                }
-
-            };
-            ctx.TriangleStrip_Enqueue(material, fillTask);
         }
         #endregion
 
