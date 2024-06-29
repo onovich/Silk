@@ -24,12 +24,15 @@ namespace MortiseFrame.Silk.Sample {
             core = new GLCore();
         }
 
-        void OnRenderObject() {
+        void LateUpdate() {
             core.DrawRing(mainCamera, material, material, new Vector3(-2, 2, 0), 1, 4, Color.red, fill: fill);
-            core.DrawLine(mainCamera, material, start, end, Color.green, thickness);
+            core.DrawLine(mainCamera, material, start, end, Color.red, thickness);
             core.DrawRect(mainCamera, material, material, Vector2.zero, new Vector2(2, 2), Color.red, thickness, fill: fill);
-            core.DrawCircle(mainCamera, material, material, new Vector3(2, 2, 0), 1, Color.blue, fill: fill);
-            core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white, thickness, fill: fill);
+            core.DrawCircle(mainCamera, material, material, new Vector3(2, 2, 0), 1, Color.red, fill: fill);
+            core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.red, thickness, fill: fill);
+        }
+
+        void OnRenderObject() {
             core.Tick();
         }
 
