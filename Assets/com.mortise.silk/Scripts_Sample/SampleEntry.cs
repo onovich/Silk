@@ -39,8 +39,8 @@ namespace MortiseFrame.Silk.Sample {
         void LateUpdate() {
             core.DrawLine(mainCamera, material, start, end, Color.cyan, thickness);
             if (fill) {
-                core.DrawRing(mainCamera, material, new Vector3(-2, 2, 0), 1, 4, Color.red);
                 core.DrawCircle(mainCamera, material, agent, 1, Color.yellow);
+                core.DrawRing(mainCamera, material, new Vector3(-2, 2, 0), 1, 4, Color.red);
                 core.DrawRect(mainCamera, material, new Vector3(2, 2, 0), Vector2.one, Color.green);
                 core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white);
             } else {
