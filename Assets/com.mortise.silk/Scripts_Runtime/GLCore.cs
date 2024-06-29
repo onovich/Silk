@@ -65,7 +65,6 @@ namespace MortiseFrame.Silk {
             DrawLine(camera, borderMaterial, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
         }
 
-
         public void DrawCircle(Camera camera, Material borderMaterial, Material fillMaterial, Vector3 center, float radius, Color color, int segments = 64, float pixelThickness = 1.0f, bool fill = false) {
             if (fill) {
                 fillMaterial.SetPass(0);
@@ -106,6 +105,44 @@ namespace MortiseFrame.Silk {
             }
 
             GL.End();
+        }
+
+        public void DrawRing(Camera camera, Material borderMaterial, Material fillMaterial, Vector3 center, float outerRadius, float pixelThickness, Color color, bool fill = false, int segments = 64) {
+            float innerRadius = outerRadius - PixelToWorld(pixelThickness, camera);
+
+            if (fill) {
+                fillMaterial.SetPass(0);
+                GL.Begin(GL.TRIANGLES);
+                GL.Color(color);
+
+                for (int i = 0; i < segments; i++) {
+                    float angle1 = 2 * Mathf.PI * i / segments;
+                    float angle2 = 2 * Mathf.PI * (i + 1) / segments;
+
+                    Vector3 vertex1_outer = new Vector3(center.x + Mathf.Cos(angle1) * outerRadius, center.y + Mathf.Sin(angle1) * outerRadius, center.z);
+                    Vector3 vertex2_outer = new Vector3(center.x + Mathf.Cos(angle2) * outerRadius, center.y + Mathf.Sin(angle2) * outerRadius, center.z);
+
+                    Vector3 vertex1_inner = new Vector3(center.x + Mathf.Cos(angle1) * innerRadius, center.y + Mathf.Sin(angle1) * innerRadius, center.z);
+                    Vector3 vertex2_inner = new Vector3(center.x + Mathf.Cos(angle2) * innerRadius, center.y + Mathf.Sin(angle2) * innerRadius, center.z);
+
+                    // Triangle 1
+                    GL.Vertex(vertex1_inner);
+                    GL.Vertex(vertex1_outer);
+                    GL.Vertex(vertex2_outer);
+
+                    // Triangle 2
+                    GL.Vertex(vertex1_inner);
+                    GL.Vertex(vertex2_outer);
+                    GL.Vertex(vertex2_inner);
+                }
+
+                GL.End();
+            } else {
+                // Draw the outer circle without fill
+                DrawCircle(camera, borderMaterial, fillMaterial, center, outerRadius, color, segments, 1, false);
+                // Draw the inner circle without fill
+                DrawCircle(camera, borderMaterial, fillMaterial, center, innerRadius, color, segments, 1, false);
+            }
         }
 
         public void DrawStar(Camera camera, Material material, Vector3 center, int points, float innerRadius, float outerRadius, Color color, float pixelThickness = 1.0f, bool fill = false) {
