@@ -25,6 +25,7 @@ namespace MortiseFrame.Silk.Sample {
         void Start() {
             Camera.main.allowMSAA = useMSAA;
             core = new GLCore();
+            core.RecordCameraInfo(mainCamera);
         }
 
         void Update() {
@@ -37,17 +38,17 @@ namespace MortiseFrame.Silk.Sample {
         }
 
         void LateUpdate() {
-            core.DrawLine(mainCamera, material, start, end, Color.cyan, thickness);
+            core.DrawLine(material, start, end, Color.cyan, thickness);
             if (fill) {
-                core.DrawCircle(mainCamera, material, agent, 1, Color.yellow);
-                core.DrawRing(mainCamera, material, new Vector3(-2, 2, 0), 1, 4, Color.red);
-                core.DrawRect(mainCamera, material, new Vector3(2, 2, 0), Vector2.one, Color.green);
-                core.DrawStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white);
+                core.DrawCircle(material, agent, 1, Color.yellow);
+                core.DrawRing(material, new Vector3(-2, 2, 0), 1, 4, Color.red);
+                core.DrawRect(material, new Vector3(2, 2, 0), Vector2.one, Color.green);
+                core.DrawStar(material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white);
             } else {
-                core.DrawWiredCircle(mainCamera, material, agent, 1, Color.yellow, thickness);
-                core.DrawWiredRing(mainCamera, material, new Vector3(-2, 2, 0), 1, thickness, Color.red);
-                core.DrawWiredRect(mainCamera, material, new Vector3(2, 2, 0), Vector2.one, Color.green, thickness);
-                core.DrawWiredStar(mainCamera, material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white, thickness);
+                core.DrawWiredCircle(material, agent, 1, Color.yellow, thickness);
+                core.DrawWiredRing(material, new Vector3(-2, 2, 0), 1, thickness, Color.red);
+                core.DrawWiredRect(material, new Vector3(2, 2, 0), Vector2.one, Color.green, thickness);
+                core.DrawWiredStar(material, new Vector3(-2, -2, 0), starPoints, starInnerRadius, starOuterRadius, Color.white, thickness);
             }
 
         }

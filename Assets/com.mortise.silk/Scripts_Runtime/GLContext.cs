@@ -7,7 +7,12 @@ namespace MortiseFrame.Silk {
 
     public class GLContext {
 
-        Camera mainCamera;
+        bool isOrthographic;
+        float orthographicSize;
+        int pixelHeight;
+        float fieldOfView;
+        internal float pixelToWorldFactor;
+        internal Vector2 cameraForward;
 
         Dictionary<Material, Queue<Action>> event_queue_triangle_strip;
         Dictionary<Material, Queue<Action>> event_queue_triangle;
@@ -19,8 +24,17 @@ namespace MortiseFrame.Silk {
             event_queue_line_strip = new Dictionary<Material, Queue<Action>>();
         }
 
-        public void SetCamera(Camera camera) {
-            mainCamera = camera;
+        public void RecordCameraInfo(Camera camera) {
+            isOrthographic = camera.orthographic;
+            orthographicSize = camera.orthographicSize;
+            pixelHeight = camera.pixelHeight;
+            fieldOfView = camera.fieldOfView;
+            if (isOrthographic) {
+                pixelToWorldFactor = orthographicSize * 2 / pixelHeight;
+            } else {
+                pixelToWorldFactor = Mathf.Tan(fieldOfView * Mathf.Deg2Rad * 0.5f) * 2.0f / pixelHeight;
+            }
+            cameraForward = camera.transform.forward;
         }
 
         public void TriangleStrip_Execute(Action<Material> begin, Action end) {

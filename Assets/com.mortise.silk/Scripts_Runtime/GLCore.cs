@@ -29,6 +29,10 @@ namespace MortiseFrame.Silk {
 
         }
 
+        public void RecordCameraInfo(Camera camera) {
+            ctx.RecordCameraInfo(camera);
+        }
+
         public Material CreateMaterial(Shader shader) {
             // Shader shader = Shader.Find("Custom/FXAA");
             var mat = new Material(shader);
@@ -36,17 +40,12 @@ namespace MortiseFrame.Silk {
             return mat;
         }
 
-        float PixelToWorld(float pixelThickness, Camera cam) {
-            if (cam.orthographic) {
-                return pixelThickness * (cam.orthographicSize * 2) / cam.pixelHeight;
-            } else {
-                return pixelThickness * Mathf.Tan(cam.fieldOfView * Mathf.Deg2Rad * 0.5f) * 2.0f / cam.pixelHeight;
-            }
+        float PixelToWorld(float pixelThickness) {
+            return pixelThickness * ctx.pixelToWorldFactor;
         }
 
         #region Line
-        public void DrawLine(Camera camera,
-                             Material material,
+        public void DrawLine(Material material,
                              Vector3 start,
                              Vector3 end,
                              Color color,
@@ -66,9 +65,9 @@ namespace MortiseFrame.Silk {
 
             if (pixelThickness > 1) {
                 Action task = () => {
-                    float thickness = PixelToWorld(pixelThickness, camera);
+                    float thickness = PixelToWorld(pixelThickness);
                     GL.Color(color);
-                    Vector3 perpendicular = Vector3.Cross(end - start, camera.transform.forward).normalized * thickness / 2;
+                    Vector3 perpendicular = Vector3.Cross(end - start, ctx.cameraForward).normalized * thickness / 2;
 
                     GL.Vertex(start - perpendicular);
                     GL.Vertex(start + perpendicular);
@@ -81,8 +80,7 @@ namespace MortiseFrame.Silk {
         #endregion
 
         #region Rect
-        public void DrawRect(Camera camera,
-                             Material material,
+        public void DrawRect(Material material,
                              Vector2 center,
                              Vector2 size,
                              Color color) {
@@ -103,8 +101,7 @@ namespace MortiseFrame.Silk {
         #endregion
 
         #region WiredRect
-        public void DrawWiredRect(Camera camera,
-                             Material material,
+        public void DrawWiredRect(Material material,
                              Vector2 center,
                              Vector2 size,
                              Color color,
@@ -116,16 +113,15 @@ namespace MortiseFrame.Silk {
                 return;
             }
 
-            DrawLine(camera, material, new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0), color, pixelThickness);
-            DrawLine(camera, material, new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0), color, pixelThickness);
-            DrawLine(camera, material, new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0), color, pixelThickness);
-            DrawLine(camera, material, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
+            DrawLine(material, new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0), color, pixelThickness);
+            DrawLine(material, new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0), color, pixelThickness);
+            DrawLine(material, new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0), color, pixelThickness);
+            DrawLine(material, new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0), color, pixelThickness);
         }
         #endregion
 
         #region Circle
-        public void DrawCircle(Camera camera,
-                               Material material,
+        public void DrawCircle(Material material,
                                Vector3 center,
                                float radius,
                                Color color,
@@ -150,17 +146,16 @@ namespace MortiseFrame.Silk {
         #endregion
 
         #region WiredCircle
-        public void DrawWiredCircle(Camera camera,
-                              Material material,
-                              Vector3 center,
-                              float radius,
-                              Color color,
-                              float pixelThickness = 1f,
-                              int segments = 64) {
+        public void DrawWiredCircle(Material material,
+                                    Vector3 center,
+                                    float radius,
+                                    Color color,
+                                    float pixelThickness = 1f,
+                                    int segments = 64) {
 
             Action boundTask = () => {
 
-                float thickness = PixelToWorld(pixelThickness, camera);
+                float thickness = PixelToWorld(pixelThickness);
                 GL.Color(color);
 
                 for (int i = 0; i <= segments; i++) {
@@ -181,14 +176,13 @@ namespace MortiseFrame.Silk {
         #endregion
 
         #region Ring
-        public void DrawRing(Camera camera,
-                             Material material,
+        public void DrawRing(Material material,
                              Vector3 center,
                              float outerRadius,
                              float pixelThickness,
                              Color color,
                              int segments = 64) {
-            float innerRadius = outerRadius - PixelToWorld(pixelThickness, camera);
+            float innerRadius = outerRadius - PixelToWorld(pixelThickness);
 
             GL.Color(color);
 
@@ -202,31 +196,29 @@ namespace MortiseFrame.Silk {
                 Vector3 vertex1_inner = new Vector3(center.x + Mathf.Cos(angle1) * innerRadius, center.y + Mathf.Sin(angle1) * innerRadius, center.z);
                 Vector3 vertex2_inner = new Vector3(center.x + Mathf.Cos(angle2) * innerRadius, center.y + Mathf.Sin(angle2) * innerRadius, center.z);
 
-                DrawTriangle(camera, material, vertex1_inner, vertex1_outer, vertex2_outer, color);
-                DrawTriangle(camera, material, vertex1_inner, vertex2_outer, vertex2_inner, color);
+                DrawTriangle(material, vertex1_inner, vertex1_outer, vertex2_outer, color);
+                DrawTriangle(material, vertex1_inner, vertex2_outer, vertex2_inner, color);
             }
 
         }
         #endregion
 
         #region WiredRing
-        public void DrawWiredRing(Camera camera,
-                             Material material,
-                             Vector3 center,
-                             float outerRadius,
-                             float pixelThickness,
-                             Color color,
-                             int segments = 64) {
-            float innerRadius = outerRadius - PixelToWorld(pixelThickness, camera);
+        public void DrawWiredRing(Material material,
+                                  Vector3 center,
+                                  float outerRadius,
+                                  float pixelThickness,
+                                  Color color,
+                                  int segments = 64) {
+            float innerRadius = outerRadius - PixelToWorld(pixelThickness);
 
-            DrawWiredCircle(camera, material, center, outerRadius, color, pixelThickness, segments);
-            DrawWiredCircle(camera, material, center, innerRadius, color, pixelThickness, segments);
+            DrawWiredCircle(material, center, outerRadius, color, pixelThickness, segments);
+            DrawWiredCircle(material, center, innerRadius, color, pixelThickness, segments);
         }
         #endregion
 
         #region Triangle
-        public void DrawTriangle(Camera camera,
-                                 Material material,
+        public void DrawTriangle(Material material,
                                  Vector3 a,
                                  Vector3 b,
                                  Vector3 c,
@@ -242,22 +234,20 @@ namespace MortiseFrame.Silk {
         #endregion
 
         #region WiredTriangle
-        public void DrawWiredTriangle(Camera camera,
-                                 Material material,
-                                 Vector3 a,
-                                 Vector3 b,
-                                 Vector3 c,
-                                 Color color,
-                                 float pixelThickness) {
-            DrawLine(camera, material, a, b, color, pixelThickness);
-            DrawLine(camera, material, b, c, color, pixelThickness);
-            DrawLine(camera, material, c, a, color, pixelThickness);
+        public void DrawWiredTriangle(Material material,
+                                      Vector3 a,
+                                      Vector3 b,
+                                      Vector3 c,
+                                      Color color,
+                                      float pixelThickness) {
+            DrawLine(material, a, b, color, pixelThickness);
+            DrawLine(material, b, c, color, pixelThickness);
+            DrawLine(material, c, a, color, pixelThickness);
         }
         #endregion
 
         #region Star
-        public void DrawStar(Camera camera,
-                             Material material,
+        public void DrawStar(Material material,
                              Vector3 center,
                              int points,
                              float innerRadius,
@@ -273,20 +263,19 @@ namespace MortiseFrame.Silk {
 
                 Vector3 vertex1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
                 Vector3 vertex2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
-                DrawTriangle(camera, material, center, vertex1, vertex2, color);
+                DrawTriangle(material, center, vertex1, vertex2, color);
             }
         }
         #endregion
 
         #region WiredStar
-        public void DrawWiredStar(Camera camera,
-                             Material material,
-                             Vector3 center,
-                             int points,
-                             float innerRadius,
-                             float outerRadius,
-                             Color color,
-                             float pixelThickness) {
+        public void DrawWiredStar(Material material,
+                                  Vector3 center,
+                                  int points,
+                                  float innerRadius,
+                                  float outerRadius,
+                                  Color color,
+                                  float pixelThickness) {
 
             GL.Color(color);
             for (int i = 0; i < points * 2; i++) {
@@ -299,7 +288,7 @@ namespace MortiseFrame.Silk {
                 Vector3 point1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
                 Vector3 point2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
 
-                DrawLine(camera, material, point1, point2, color, pixelThickness);
+                DrawLine(material, point1, point2, color, pixelThickness);
             }
         }
         #endregion
