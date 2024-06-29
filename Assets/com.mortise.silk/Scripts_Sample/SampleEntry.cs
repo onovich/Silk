@@ -33,6 +33,10 @@ namespace MortiseFrame.Silk.Sample {
             core.Tick();
         }
 
+        void OnDestroy() {
+            core.TearDown();
+        }
+
     }
 
 }

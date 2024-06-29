@@ -11,12 +11,10 @@ namespace MortiseFrame.Silk {
 
         Dictionary<Material, Queue<Action>> event_queue_triangle_strip;
         Dictionary<Material, Queue<Action>> event_queue_triangle;
-        Dictionary<Material, Queue<Action>> event_queue_lines;
 
         public GLContext() {
             event_queue_triangle_strip = new Dictionary<Material, Queue<Action>>();
             event_queue_triangle = new Dictionary<Material, Queue<Action>>();
-            event_queue_lines = new Dictionary<Material, Queue<Action>>();
         }
 
         public void SetCamera(Camera camera) {
@@ -59,26 +57,9 @@ namespace MortiseFrame.Silk {
             event_queue_triangle[material].Enqueue(action);
         }
 
-        public void Lines_Execute(Action<Material> begin, Action end) {
-            foreach (var kv in event_queue_lines) {
-                begin.Invoke(kv.Key);
-                while (kv.Value.Count > 0) {
-                    kv.Value.Dequeue().Invoke();
-                    GL.Vertex3(float.NaN, float.NaN, float.NaN);
-                }
-                end.Invoke();
-            }
-        }
-
-        public void Lines_Enqueue(Material material, Action action) {
-            if (!event_queue_lines.ContainsKey(material)) {
-                event_queue_lines[material] = new Queue<Action>();
-            }
-            event_queue_lines[material].Enqueue(action);
-        }
-
         public void Clear() {
             event_queue_triangle_strip.Clear();
+            event_queue_triangle.Clear();
         }
 
     }

@@ -27,13 +27,6 @@ namespace MortiseFrame.Silk {
                 GL.End();
             });
 
-            ctx.Lines_Execute((materai) => {
-                materai.SetPass(0);
-                GL.Begin(GL.LINES);
-            }, () => {
-                GL.End();
-            });
-
         }
 
         public Material CreateMaterial(Shader shader) {
@@ -166,16 +159,24 @@ namespace MortiseFrame.Silk {
             };
             ctx.Triangle_Enqueue(fillMaterial, fillTask);
 
-            // Draw the outer circle without fill
             DrawCircle(camera, borderMaterial, fillMaterial, center, outerRadius, color, segments, 1, false);
-            // Draw the inner circle without fill
             DrawCircle(camera, borderMaterial, fillMaterial, center, innerRadius, color, segments, 1, false);
+        }
+
+        public void DrawTriangle(Camera camera, Material material, Vector3 a, Vector3 b, Vector3 c, Color color, float pixelThickness = 1.0f) {
+            Action task = () => {
+                GL.Color(color);
+                GL.Vertex(a);
+                GL.Vertex(b);
+                GL.Vertex(c);
+            };
+            ctx.Triangle_Enqueue(material, task);
         }
 
         public void DrawStar(Camera camera, Material material, Vector3 center, int points, float innerRadius, float outerRadius, Color color, float pixelThickness = 1.0f, bool fill = false) {
 
-            Action fillTask = () => {
-                if (fill) {
+            if (fill) {
+                Action fillTask = () => {
                     GL.Color(color);
 
                     for (int i = 0; i < points * 2; i++) {
@@ -192,27 +193,28 @@ namespace MortiseFrame.Silk {
                         GL.Vertex(vertex1);
                         GL.Vertex(vertex2);
                     }
-                }
-            };
-            ctx.Triangle_Enqueue(material, fillTask);
+                };
+                ctx.TriangleStrip_Enqueue(material, fillTask);
+            }
 
-            Action boundTask = () => {
-                GL.Color(color);
-                for (int i = 0; i < points * 2; i++) {
-                    float angle1 = Mathf.PI * i / points;
-                    float angle2 = Mathf.PI * (i + 1) / points;
+            GL.Color(color);
+            for (int i = 0; i < points * 2; i++) {
+                float angle1 = Mathf.PI * i / points;
+                float angle2 = Mathf.PI * (i + 1) / points;
 
-                    float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
-                    float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
+                float radius1 = (i % 2 == 0) ? outerRadius : innerRadius;
+                float radius2 = ((i + 1) % 2 == 0) ? outerRadius : innerRadius;
 
-                    Vector3 point1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
-                    Vector3 point2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
+                Vector3 point1 = new Vector3(center.x + Mathf.Cos(angle1) * radius1, center.y + Mathf.Sin(angle1) * radius1, center.z);
+                Vector3 point2 = new Vector3(center.x + Mathf.Cos(angle2) * radius2, center.y + Mathf.Sin(angle2) * radius2, center.z);
 
-                    GL.Vertex(point1);
-                    GL.Vertex(point2);
-                }
-            };
-            ctx.Lines_Enqueue(material, boundTask);
+                DrawLine(camera, material, point1, point2, color, pixelThickness);
+            }
         }
+
+        public void TearDown() {
+            ctx.Clear();
+        }
+
     }
 }
