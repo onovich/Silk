@@ -10,6 +10,31 @@ namespace MortiseFrame.Silk {
             ctx = new GLContext();
         }
 
+        public void Tick() {
+
+            ctx.TriangleStrip_Execute((materai) => {
+                materai.SetPass(0);
+                GL.Begin(GL.TRIANGLE_STRIP);
+            }, () => {
+                GL.End();
+            });
+
+            ctx.Triangle_Execute((materai) => {
+                materai.SetPass(0);
+                GL.Begin(GL.TRIANGLES);
+            }, () => {
+                GL.End();
+            });
+
+            ctx.Lines_Execute((materai) => {
+                materai.SetPass(0);
+                GL.Begin(GL.LINES);
+            }, () => {
+                GL.End();
+            });
+
+        }
+
         public Material CreateMaterial(Shader shader) {
             // Shader shader = Shader.Find("Custom/FXAA");
             var mat = new Material(shader);
